@@ -1,16 +1,11 @@
 #!/system/bin/sh
+# RemoveThermaldZTE/action.sh
+# https://github.com/Redroadsl/TweaksZTE
 
-# 检测 ZTE 设备上的关键服务与属性状态
+# 调度和温控状态检测脚本 改自酷安@关于被取名困扰这事儿
 
-
-if [ $(id -u) -ne 0 ]; then
-    echo "> 请使用Root权限运行脚本。"
-    sleep 3
-    exit 13
-fi
-
-echo "==========================="
-echo "ZTE 系统调度与温控状态检测"
+echo "========================"
+echo "系统调度与温控状态检测"
 echo ""
 
 # 排除干扰项

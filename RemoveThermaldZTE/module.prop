@@ -1,6 +1,7 @@
 id=RemoveThermaldZTE
-name=红魔努比亚删温控
-version=1
+name=tZTE 去除温控调度
+version=Cube
 versionCode=1
 author=Redroadsl@outlook.com
-description=较为温和地替换温控配置文件和阻止温控服务启动（修改自酷安@关于被取名困扰这事儿）
+description=【执行获取状态】温和地阻断和停止温控调度服务。修改自酷安@关于被取名困扰这事儿。Github:TweaksZTE
+updateJson=https://raw.githubusercontent.com/Redroadsl/TweaksZTE/refs/heads/main/RemoveThermaldZTE/update.json
