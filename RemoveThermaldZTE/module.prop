@@ -1,0 +1,6 @@
+id=RemoveThermaldZTE
+name=红魔努比亚删温控
+version=1
+versionCode=1
+author=Redroadsl
+description=较为温和地替换温控配置文件和阻止温控服务启动（修改自酷安@关于被取名困扰这事儿）
