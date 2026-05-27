@@ -1,7 +1,7 @@
 id=TouchTweakZTE
 name=tZTE 跟手触控调优
 version=Swift
-versionCode=1
+versionCode=2
 author=Redroadsl@outlook.com
 description=【执行获取状态】避免增加耗电的条件下尽量调优触控。Github:TweaksZTE
 updateJson=https://raw.githubusercontent.com/Redroadsl/TweaksZTE/refs/heads/main/TouchTweakZTE/update.json
