@@ -9,13 +9,13 @@ echo "系统调度与温控状态检测"
 echo ""
 
 # 排除干扰项
-EXCLUDE_PATTERN="grep"
+EXCLUDE_PATTERN="grep|RemoveThermaldZTE"
 
 
 # 检测 cube 相关进程
 echo ""
 echo "> 名称包含 cube 的进程"
-ps -A -o user,pid,args | grep -i cube | grep -v "$EXCLUDE_PATTERN"
+ps -A -o user,pid,args | grep -i cube | grep -E -v "$EXCLUDE_PATTERN"
 if [ $? -ne 0 ]; then
     echo "  未找到任何与 cube 相关的进程"
 fi
@@ -33,7 +33,7 @@ fi
 # 检测 zperf 相关进程
 echo ""
 echo "> 名称包含 zperf 的进程"
-ps -A -o user,pid,args | grep -i zperf | grep -v "$EXCLUDE_PATTERN"
+ps -A -o user,pid,args | grep -i zperf | grep -E -v "$EXCLUDE_PATTERN"
 if [ $? -ne 0 ]; then
     echo "  未找到任何与 zperf 相关的进程"
 fi
@@ -42,7 +42,7 @@ fi
 # 检测 perf 相关进程
 echo ""
 echo "> 名称包含 perf 的进程"
-ps -A -o user,pid,args | grep -i perf | grep -v "$EXCLUDE_PATTERN"
+ps -A -o user,pid,args | grep -i perf | grep -E -v "$EXCLUDE_PATTERN"
 if [ $? -ne 0 ]; then
     echo "  未找到任何与 perf 相关的进程"
 fi
@@ -62,7 +62,7 @@ echo ""
 echo "> 名称包含 thermal 的进程"
 ps -A -o user,pid,args | grep -i thermal \
     | grep -v "android.hardware.thermal-service.qti" \
-    | grep -v "$EXCLUDE_PATTERN"
+    | grep -E -v "$EXCLUDE_PATTERN"
 if [ $? -ne 0 ]; then
     echo "  未找到其他 thermal 相关进程"
 fi
@@ -70,7 +70,7 @@ fi
 # 检测ai引擎进程
 echo ""
 echo "> AI引擎进程 com.zte.aiengine"
-ps -A -o user,pid,args | grep "com.zte.aiengine" | grep -v "$EXCLUDE_PATTERN"
+ps -A -o user,pid,args | grep "com.zte.aiengine" | grep -E -v "$EXCLUDE_PATTERN"
 if [ $? -ne 0 ]; then
     echo "  未找到ai引擎进程"
 fi

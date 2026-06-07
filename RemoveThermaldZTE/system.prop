@@ -1,3 +1,7 @@
 ro.vendor.feature.zte_feature_zperf_cube=false
 ro.vendor.feature.zte_feature_cube_thermallevel_control=false
 ro.vendor.feature.zte_feature_thermal_networklimit=false
+persist.sys.emode.thermal=0
+persist.zte.dualthermal.enable=0
+persist.vendor.zte.thermal.block=1
+persist.vendor.ai.dps.stop=1
