@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TouchTweakZTE</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #21262d;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text2: #8b949e;
+  --text3: #6e7681;
+  --accent: #58a6ff;
+  --accent2: #1f6feb;
+  --success: #3fb950;
+  --warn: #d29922;
+  --error: #f85149;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans SC',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;
+  padding-bottom:88px;line-height:1.5;
+}
+.container{max-width:600px;margin:0 auto;padding:16px}
+
+/* Header */
+.header{padding:20px 0 8px;text-align:center}
+.header h1{font-size:1.4rem;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.header .subtitle{font-size:0.8rem;color:var(--text3);margin-top:2px}
+
+/* Section */
+.section{margin-bottom:20px}
+.section-title{
+  font-size:0.85rem;font-weight:600;color:var(--accent);
+  text-transform:uppercase;letter-spacing:0.5px;
+  margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);
+}
+
+/* Presets */
+.presets-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.preset-card{
+  flex:1 1 calc(50% - 8px);min-width:140px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px;cursor:pointer;
+  transition:all .15s ease;position:relative;overflow:hidden;
+}
+.preset-card:active{transform:scale(.97);background:var(--surface2)}
+.preset-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.preset-card .preset-edit-btn{
+  position:absolute;top:6px;right:6px;
+  width:28px;height:28px;border-radius:50%;
+  background:transparent;border:none;color:var(--text3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;z-index:1;
+}
+.preset-card .preset-edit-btn:active{background:var(--surface2);color:var(--text)}
+.preset-name{font-size:0.9rem;font-weight:600;margin-bottom:2px;padding-right:24px}
+.preset-name-en{font-size:0.7rem;color:var(--text2)}
+.preset-badge{
+  display:inline-block;font-size:0.6rem;padding:1px 6px;border-radius:10px;
+  margin-top:4px;background:var(--surface2);color:var(--text3);
+}
+.preset-badge.builtin{background:rgba(88,166,255,.15);color:var(--accent)}
+.preset-badge.user{background:rgba(63,185,80,.15);color:var(--success)}
+.preset-actions{display:flex;gap:4px;margin-top:6px}
+.preset-actions button{
+  font-size:0.6rem;padding:2px 6px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:transparent;color:var(--text2);
+  cursor:pointer;transition:all .1s;
+}
+.preset-actions button:active{background:var(--surface2)}
+.preset-actions button.danger{color:var(--error);border-color:rgba(248,81,73,.3)}
+.preset-actions button.danger:active{background:rgba(248,81,73,.1)}
+
+.preset-toolbar{display:flex;gap:6px;justify-content:flex-end}
+.preset-toolbar button{
+  font-size:0.75rem;padding:6px 14px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--surface);
+  color:var(--text);cursor:pointer;transition:all .1s;
+}
+.preset-toolbar button:active{background:var(--surface2)}
+.preset-toolbar button.primary{background:var(--accent2);border-color:var(--accent2);color:#fff}
+
+/* Settings */
+.setting-group{margin-bottom:14px}
+.setting-group-label{
+  font-size:0.75rem;font-weight:600;color:var(--text2);
+  margin-bottom:6px;
+}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);margin-bottom:6px;
+  transition:border-color .15s;
+}
+.setting-row:hover{border-color:var(--text3)}
+.setting-row.disabled{opacity:0.4;pointer-events:none}
+.setting-info{flex:1;min-width:0}
+.setting-label{font-size:0.85rem;font-weight:500}
+.setting-label-en{font-size:0.7rem;color:var(--text2);margin-top:1px}
+.setting-control{flex-shrink:0;margin-left:12px}
+.setting-error{font-size:0.65rem;color:var(--error);margin-top:2px;display:none}
+
+/* Toggle Switch */
+.toggle{position:relative;display:inline-block;width:44px;height:26px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{
+  position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+  background:var(--surface2);border-radius:26px;transition:.2s;
+  border:1px solid var(--border);
+}
+.toggle .slider::before{
+  content:'';position:absolute;height:20px;width:20px;left:2px;bottom:2px;
+  background:var(--text2);border-radius:50%;transition:.2s;
+}
+.toggle input:checked+.slider{background:var(--accent2);border-color:var(--accent2)}
+.toggle input:checked+.slider::before{transform:translateX(18px);background:#fff}
+
+/* Select & Input */
+select,input[type=number],input[type=text]{
+  background:var(--surface2);color:var(--text);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:6px 10px;font-size:0.85rem;
+  font-family:inherit;outline:none;transition:border-color .15s;
+  min-width:80px;text-align:center;
+}
+select:focus,input:focus{border-color:var(--accent)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238b949e'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+input[type=number]{width:70px}
+input[type=text]{width:120px;text-align:left}
+.readonly-value{font-size:0.9rem;font-weight:600;color:var(--accent);font-family:'SF Mono',monospace}
+
+/* Floating Refresh Button */
+.fab-refresh{
+  position:fixed;top:16px;right:16px;z-index:110;
+  width:42px;height:42px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);cursor:pointer;font-size:1.1rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.4);
+  transition:all .15s ease;-webkit-tap-highlight-color:transparent;
+}
+.fab-refresh:active{background:var(--surface2);transform:scale(.92)}
+.fab-refresh:disabled{opacity:0.4;pointer-events:none}
+.fab-refresh.spinner-inset::after{
+  content:'';display:block;width:18px;height:18px;
+  border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .6s linear infinite;
+}
+
+/* Floating Save Button */
+.fab-save{
+  position:fixed;bottom:24px;right:16px;z-index:110;
+  width:52px;height:52px;border-radius:14px;
+  background:var(--success);border:none;
+  color:#fff;cursor:pointer;font-size:1.2rem;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(63,185,80,0.35);
+  transition:all .15s ease;-webkit-tap-highlight-color:transparent;
+}
+.fab-save:active{background:#2ea043;transform:scale(.92)}
+.fab-save:disabled{opacity:0.4;pointer-events:none;transform:none}
+
+/* Modal */
+.modal-overlay{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.6);z-index:200;align-items:center;
+  justify-content:center;padding:20px;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;width:100%;max-width:420px;
+  max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+.modal h3{font-size:1rem;margin-bottom:14px;font-weight:600}
+.modal .form-group{margin-bottom:12px}
+.modal .form-group label{
+  display:block;font-size:0.75rem;color:var(--text2);margin-bottom:4px;font-weight:500;
+}
+.modal .form-group input,.modal .form-group select{
+  width:100%;text-align:left;padding:8px 12px;
+}
+.modal-buttons{display:flex;gap:8px;margin-top:16px}
+.modal-buttons button{
+  flex:1;padding:10px;border-radius:var(--radius-sm);font-size:0.85rem;
+  font-weight:600;cursor:pointer;border:none;font-family:inherit;
+}
+.modal-btn-cancel{background:var(--surface2);color:var(--text)}
+.modal-btn-save{background:var(--accent2);color:#fff}
+
+/* Toast */
+.toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;pointer-events:none}
+.toast{
+  padding:10px 20px;border-radius:var(--radius-sm);font-size:0.85rem;
+  font-weight:500;color:#fff;margin-bottom:8px;animation:toastIn .3s ease;
+  box-shadow:0 4px 12px rgba(0,0,0,0.4);white-space:nowrap;
+}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--error)}
+.toast.warn{background:var(--warn)}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+
+/* Loading spinner */
+.spinner{
+  display:inline-block;width:18px;height:18px;border:2px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay{
+  display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.5);z-index:250;align-items:center;justify-content:center;
+}
+.loading-overlay.show{display:flex}
+.loading-box{
+  background:var(--surface);border-radius:var(--radius);padding:24px 32px;
+  text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+.loading-box .spinner{margin-bottom:8px}
+.loading-box p{font-size:0.85rem;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>TouchTweakZTE</h1>
+    <div class="subtitle">触控调优 / Touch Optimization</div>
+  </div>
+
+  <!-- Presets Section -->
+  <div class="section" id="presetsSection">
+    <div class="section-title">预设方案 / Profiles</div>
+    <div class="presets-grid" id="presetsGrid"></div>
+    <div class="preset-toolbar">
+      <button class="primary" onclick="presetManager.showEditor()">+ 新建预设 New</button>
+    </div>
+  </div>
+
+  <!-- Simple Settings Section -->
+  <div class="section" id="simpleSettings">
+    <div class="section-title">基础设置 / Basic Settings</div>
+    <div id="simpleSettingsList"></div>
+  </div>
+
+  <!-- Edge Settings Section -->
+  <div class="section" id="edgeSettings">
+    <div class="section-title">边缘抑制与抖动过滤 / Edge &amp; Jitter</div>
+    <div id="edgeSettingsList"></div>
+  </div>
+</div>
+
+<!-- Floating Refresh Button -->
+<button class="fab-refresh" id="fabRefresh" onclick="app.refreshAll()" title="刷新 / Refresh">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+</button>
+
+<!-- Floating Save Button -->
+<button class="fab-save" id="fabSave" onclick="app.applyAndSave()" title="应用并保存 / Apply &amp; Save">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+</button>
+
+<!-- Preset Editor Modal -->
+<div class="modal-overlay" id="presetModal">
+  <div class="modal">
+    <h3 id="presetModalTitle">新建预设 / New Profile</h3>
+    <div class="form-group">
+      <label>预设名称 / Profile Name</label>
+      <input type="text" id="presetNameInput" placeholder="输入名称 / Enter name" maxlength="30">
+    </div>
+    <div id="presetModalFields"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn-cancel" onclick="presetManager.closeEditor()">取消 / Cancel</button>
+      <button class="modal-btn-save" id="presetModalSaveBtn" onclick="presetManager.saveEditor()">保存 / Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loadingText">处理中...</p>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+// KernelSU Bridge (inlined for reliability on file:// origins)
+// ============================================================
+const kernelsu = (function() {
+  var _cbId = 0;
+  function _cbName(n) { return n + '_cb_' + Date.now() + '_' + (_cbId++); }
+
+  function isAvailable() {
+    return typeof ksu !== 'undefined' && ksu && typeof ksu.exec === 'function';
+  }
+
+  function exec(command, options) {
+    options = options || {};
+    return new Promise(function(resolve, reject) {
+      if (!isAvailable()) {
+        reject(new Error('KernelSU bridge not available'));
+        return;
+      }
+      var name = _cbName('exec');
+      function cleanup() { try { delete window[name]; } catch(e) {} }
+      window[name] = function(errno, stdout, stderr) {
+        resolve({ errno: errno, stdout: (stdout || '').trim(), stderr: (stderr || '').trim() });
+        cleanup();
+      };
+      try {
+        ksu.exec(command, JSON.stringify(options), name);
+      } catch(e) {
+        cleanup();
+        reject(e);
+      }
+    });
+  }
+
+  function toast(msg) {
+    try { if (isAvailable()) ksu.toast(String(msg)); } catch(e) {}
+  }
+
+  function fullScreen(enable) {
+    try { if (isAvailable()) ksu.fullScreen(!!enable); } catch(e) {}
+  }
+
+  return { exec: exec, toast: toast, fullScreen: fullScreen, isAvailable: isAvailable };
+})();
+
+// ============================================================
+// Constants
+// ============================================================
+var MODULE_DIR = '/data/adb/modules/TouchTweakZTE';
+var PRESETS_FILE = MODULE_DIR + '/presets.json';
+var PROC_BASE = '/proc/touchscreen';
+var EDGE_NODE = PROC_BASE + '/edge_report_limit';
+
+// ============================================================
+// Settings Definitions
+// ============================================================
+var SIMPLE_SETTINGS = [
+  { id: 'play_game',       node: 'play_game',         label: '游戏模式',       labelEn: 'Game Mode',            type: 'toggle',  default: 1, toggleOn: 1, toggleOff: 0 },
+  { id: 'follow_hand_level', node: 'follow_hand_level', label: '跟手性延迟',     labelEn: 'Follow Hand Level',     type: 'select',  default: 0, options: [0,1,2,3],        optionLabels: {0:'0 - 最高/Highest', 1:'1 - 高/High', 2:'2 - 中/Medium', 3:'3 - 低/Low'} },
+  { id: 'stability_level', node: 'stability_level',    label: '稳定性等级',     labelEn: 'Stability Level',       type: 'select',  default: 0, options: [0,1,2,3,4],      optionLabels: {0:'0 - 最低/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最高/Highest'} },
+  { id: 'sensibility',     node: 'sensibility',        label: '灵敏度',         labelEn: 'Sensitivity',           type: 'select',  default: 4, options: [0,1,2,3,4],      optionLabels: {0:'0',1:'1',2:'2',3:'3',4:'4 - 最高/Highest'} },
+  { id: 'tp_report_rate',  node: 'tp_report_rate',     label: '硬件回报率',     labelEn: 'Report Rate (Hz)',      type: 'readonly', default: null },
+];
+
+var EDGE_SETTINGS = [
+  { id: 'edge_algo_open',         key: 'algo_open',         label: '边缘抑制算法',   labelEn: 'Edge Algo',            type: 'toggle', default: 0, toggleOn: 1, toggleOff: 0 },
+  { id: 'edge_jitter_pixel',      key: 'jitter_pixel',      label: '抖动过滤像素',   labelEn: 'Jitter Pixel Thr.',    type: 'number', default: 0, min: 0, max: 100 },
+  { id: 'edge_jitter_timer',      key: 'jitter_timer',      label: '抖动过滤时间',   labelEn: 'Jitter Timer Thr.',    type: 'number', default: 0, min: 0, max: 100 },
+  { id: 'edge_click_pixel',       key: 'click_pixel',       label: '点击稳定像素',   labelEn: 'Click Pixel Thr.',     type: 'number', default: 0, min: 0, max: 100 },
+  { id: 'edge_long_press_open',   key: 'long_press_open',   label: '长按判定开关',   labelEn: 'Long Press Enable',    type: 'toggle', default: 0, toggleOn: 1, toggleOff: 0 },
+  { id: 'edge_long_press_timer',  key: 'long_press_timer',  label: '长按判定延迟',   labelEn: 'Long Press Timer',     type: 'number', default: 0, min: 0, max: 200 },
+  { id: 'edge_long_press_pixel',  key: 'long_press_pixel',  label: '长按像素阈值',   labelEn: 'Long Press Pixel',     type: 'text',   default: '0,0,0,0', placeholder: '0,0,0,0' },
+  { id: 'edge_overall',           key: 'edge_overall',      label: '总体调整值',     labelEn: 'Overall Adjustment',   type: 'number', default: 0, min: 0, max: 100 },
+];
+
+// Edge settings write order (must match boot-completed.sh sequence)
+var EDGE_WRITE_ORDER = [
+  'edge_algo_open',
+  'edge_jitter_pixel',
+  'edge_jitter_timer',
+  'edge_click_pixel',
+  'edge_long_press_open',
+  'edge_long_press_timer',
+  'edge_long_press_pixel',
+  'edge_overall'
+];
+
+// ============================================================
+// Built-in Presets
+// ============================================================
+var BUILTIN_PRESETS = [
+  {
+    id: '__builtin_gaming',
+    name: '游戏模式',
+    nameEn: 'Gaming',
+    builtin: true,
+    values: {
+      play_game: 1, follow_hand_level: 0, stability_level: 0, sensibility: 4,
+      edge_algo_open: 0, edge_jitter_pixel: 0, edge_jitter_timer: 0,
+      edge_click_pixel: 0, edge_long_press_open: 0, edge_long_press_timer: 0,
+      edge_long_press_pixel: '0,0,0,0', edge_overall: 0
+    }
+  },
+  {
+    id: '__builtin_daily',
+    name: '日常模式',
+    nameEn: 'Daily',
+    builtin: true,
+    values: {
+      play_game: 1, follow_hand_level: 1, stability_level: 1, sensibility: 2,
+      edge_algo_open: 0, edge_jitter_pixel: 2, edge_jitter_timer: 2,
+      edge_click_pixel: 2, edge_long_press_open: 0, edge_long_press_timer: 5,
+      edge_long_press_pixel: '5,5,5,5', edge_overall: 0
+    }
+  }
+];
+
+// ============================================================
+// Utility Functions
+// ============================================================
+function escapeShellArg(val) {
+  // Escape single quotes for shell: replace ' with '\''
+  return String(val).replace(/'/g, "'\\''");
+}
+
+function getDefaultValues() {
+  var vals = {};
+  SIMPLE_SETTINGS.forEach(function(s) { vals[s.id] = s.default; });
+  EDGE_SETTINGS.forEach(function(s) { vals[s.id] = s.default; });
+  return vals;
+}
+
+// ============================================================
+// Toast System
+// ============================================================
+var toastSystem = {
+  show: function(msg, type) {
+    type = type || 'success';
+    var container = document.getElementById('toastContainer');
+    var el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(function() {
+      el.classList.add('out');
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+    }, 2000);
+  },
+  success: function(msg) { this.show(msg, 'success'); },
+  error: function(msg) { this.show(msg, 'error'); kernelsu.toast('\u26A0 ' + msg); },
+  warn: function(msg) { this.show(msg, 'warn'); }
+};
+
+// ============================================================
+// Loading Overlay
+// ============================================================
+var loading = {
+  show: function(text) {
+    document.getElementById('loadingText').textContent = text || '处理中...';
+    document.getElementById('loadingOverlay').classList.add('show');
+  },
+  hide: function() {
+    document.getElementById('loadingOverlay').classList.remove('show');
+  }
+};
+
+// ============================================================
+// App State
+// ============================================================
+var appState = {
+  values: getDefaultValues(),
+  presets: [],
+  activePresetId: null,
+  initialized: false,
+  nodeStatus: {} // track which /proc nodes are available
+};
+
+// ============================================================
+// Data Operations
+// ============================================================
+var dataOps = {
+  // Read a single /proc value
+  readProcNode: function(node) {
+    return kernelsu.exec('cat ' + PROC_BASE + '/' + node).then(function(r) {
+      if (r.errno !== 0) {
+        appState.nodeStatus[node] = false;
+        return null;
+      }
+      appState.nodeStatus[node] = true;
+      return r.stdout;
+    }).catch(function(e) {
+      appState.nodeStatus[node] = false;
+      console.warn('Failed to read /proc/touchscreen/' + node + ':', e.message);
+      return null;
+    });
+  },
+
+  // Read all simple /proc values
+  readAllProcValues: function() {
+    var promises = SIMPLE_SETTINGS.map(function(s) {
+      return dataOps.readProcNode(s.node).then(function(val) {
+        if (val !== null) appState.values[s.id] = val;
+      });
+    });
+    return Promise.all(promises);
+  },
+
+  // Read edge_report_limit to detect if available
+  checkEdgeNode: function() {
+    return kernelsu.exec('cat ' + EDGE_NODE).then(function(r) {
+      appState.nodeStatus['edge_report_limit'] = (r.errno === 0);
+    }).catch(function() {
+      appState.nodeStatus['edge_report_limit'] = false;
+    });
+  },
+
+  // Load values from KSU module config system
+  loadConfig: function() {
+    // Skip read-only settings (tp_report_rate etc.)
+    var keys = SIMPLE_SETTINGS.filter(function(s) { return s.type !== 'readonly'; })
+                .concat(EDGE_SETTINGS)
+                .map(function(s) { return s.id; });
+    var promises = keys.map(function(key) {
+      return kernelsu.exec('ksud module config get ' + key).then(function(r) {
+        if (r.errno === 0 && r.stdout) {
+          appState.values[key] = r.stdout;
+        }
+      }).catch(function() {
+        // Config read failed for this key, keep default
+      });
+    });
+    return Promise.all(promises);
+  },
+
+  // Save values to KSU module config system (persist across reboots)
+  saveConfig: function() {
+    var self = this;
+    var settings = SIMPLE_SETTINGS.filter(function(s) { return s.type !== 'readonly'; })
+                    .concat(EDGE_SETTINGS);
+    var chain = Promise.resolve();
+    settings.forEach(function(s) {
+      var val = appState.values[s.id];
+      chain = chain.then(function() {
+        return kernelsu.exec("ksud module config set " + s.id + " '" + escapeShellArg(String(val)) + "'").then(function(r) {
+          if (r.errno !== 0) throw new Error('Failed to set config ' + s.id + ': errno=' + r.errno);
+        });
+      });
+    });
+    return chain;
+  },
+
+  // Write a simple setting to /proc immediately
+  writeProcNode: function(node, value) {
+    return kernelsu.exec("echo '" + escapeShellArg(value) + "' > " + PROC_BASE + '/' + node).then(function(r) {
+      if (r.errno !== 0) throw new Error('Failed to write ' + node + ': errno=' + r.errno);
+    });
+  },
+
+  // Write all edge_report_limit settings in the correct order
+  writeEdgeSettings: function() {
+    var self = this;
+    var chain = Promise.resolve();
+    EDGE_WRITE_ORDER.forEach(function(id) {
+      var setting = EDGE_SETTINGS.find(function(s) { return s.id === id; });
+      if (!setting) return;
+      var value = appState.values[id];
+      var line;
+      if (id === 'edge_overall') {
+        line = String(value);
+      } else {
+        line = setting.key + ':' + value;
+      }
+      chain = chain.then(function() {
+        return kernelsu.exec("echo '" + escapeShellArg(line) + "' > " + EDGE_NODE).then(function(r) {
+          if (r.errno !== 0) throw new Error('Failed to write edge ' + setting.key + ': errno=' + r.errno);
+        });
+      });
+    });
+    return chain;
+  },
+
+  // Write ALL settings to /proc immediately
+  applyToProc: function() {
+    var self = this;
+    var promise = Promise.resolve();
+
+    // Write simple settings (can be parallel, but sequential is safer/cleaner for error reporting)
+    SIMPLE_SETTINGS.forEach(function(s) {
+      if (s.type === 'readonly') return;
+      promise = promise.then(function() {
+        return self.writeProcNode(s.node, appState.values[s.id]).catch(function(e) {
+          console.warn('Warning writing ' + s.node + ':', e.message);
+          // Don't fail entirely, continue with other settings
+        });
+      });
+    });
+
+    // Write edge settings
+    promise = promise.then(function() {
+      return self.writeEdgeSettings().catch(function(e) {
+        console.warn('Warning writing edge settings:', e.message);
+      });
+    });
+
+    return promise;
+  },
+
+  // Load presets from file or create defaults
+  loadPresets: function() {
+    return kernelsu.exec('cat ' + PRESETS_FILE).then(function(r) {
+      if (r.errno !== 0) {
+        // No presets file, use built-in defaults
+        appState.presets = JSON.parse(JSON.stringify(BUILTIN_PRESETS));
+        // Save initial presets file
+        dataOps.savePresets().catch(function(){});
+        return;
+      }
+      try {
+        var data = JSON.parse(r.stdout);
+        if (data && Array.isArray(data.presets)) {
+          // Merge: keep builtin presets from BUILTIN_PRESETS, add user presets from file
+          var builtinMap = {};
+          BUILTIN_PRESETS.forEach(function(p) { builtinMap[p.id] = p; });
+          var loadedPresets = [];
+          var seenIds = {};
+
+          data.presets.forEach(function(p) {
+            if (p.id && builtinMap[p.id]) {
+              // It's a builtin preset - use the loaded version (allows user edits to builtins)
+              loadedPresets.push(p);
+              seenIds[p.id] = true;
+            } else if (!p.builtin) {
+              // User preset
+              loadedPresets.push(p);
+              seenIds[p.id || p.name] = true;
+            }
+          });
+
+          // Add any builtins not in the loaded file
+          BUILTIN_PRESETS.forEach(function(p) {
+            if (!seenIds[p.id]) {
+              loadedPresets.push(JSON.parse(JSON.stringify(p)));
+            }
+          });
+
+          appState.presets = loadedPresets;
+        } else {
+          appState.presets = JSON.parse(JSON.stringify(BUILTIN_PRESETS));
+        }
+      } catch(e) {
+        console.warn('Failed to parse presets.json, using builtins:', e.message);
+        appState.presets = JSON.parse(JSON.stringify(BUILTIN_PRESETS));
+      }
+    }).catch(function() {
+      appState.presets = JSON.parse(JSON.stringify(BUILTIN_PRESETS));
+    });
+  },
+
+  // Save presets to file
+  savePresets: function() {
+    var data = { presets: appState.presets };
+    var json = JSON.stringify(data, null, 2);
+    var cmd = 'cat > ' + PRESETS_FILE + " << 'PRESETSEOF'\n" + json + "\nPRESETSEOF";
+    return kernelsu.exec(cmd).then(function(r) {
+      if (r.errno !== 0) throw new Error('Failed to write presets: errno=' + r.errno);
+    });
+  }
+};
+
+// ============================================================
+// UI Rendering
+// ============================================================
+var ui = {
+  // Render all presets as cards
+  renderPresets: function() {
+    var grid = document.getElementById('presetsGrid');
+    grid.innerHTML = '';
+
+    if (appState.presets.length === 0) {
+      grid.innerHTML = '<div style="font-size:0.8rem;color:var(--text3);padding:8px">' +
+        '暂无预设 / No profiles yet</div>';
+      return;
+    }
+
+    appState.presets.forEach(function(preset, idx) {
+      var card = document.createElement('div');
+      card.className = 'preset-card';
+      if (appState.activePresetId === preset.id) {
+        card.classList.add('active');
+      }
+
+      var badgeClass = preset.builtin ? 'builtin' : 'user';
+      var badgeText = preset.builtin ? '内置 Built-in' : '用户 User';
+
+      card.innerHTML =
+        '<button class="preset-edit-btn" onclick="event.stopPropagation();presetManager.showEditor(\'' + ui.escapeAttr(preset.id) + '\')" title="编辑 / Edit">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>' +
+        '</button>' +
+        '<div class="preset-name">' + ui.escapeHtml(preset.name) + '</div>' +
+        '<div class="preset-name-en">' + ui.escapeHtml(preset.nameEn || '') + '</div>' +
+        '<span class="preset-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '<div class="preset-actions">' +
+          (preset.builtin ? '' : '<button class="danger" onclick="event.stopPropagation();presetManager.deletePreset(\'' + ui.escapeAttr(preset.id) + '\')">删除 Del</button>') +
+        '</div>';
+
+      card.addEventListener('click', function() {
+        presetManager.applyPreset(preset.id);
+      });
+
+      grid.appendChild(card);
+    });
+  },
+
+  // Render settings list
+  renderSettings: function() {
+    // Simple settings
+    var simpleContainer = document.getElementById('simpleSettingsList');
+    simpleContainer.innerHTML = '';
+    SIMPLE_SETTINGS.forEach(function(s) {
+      var row = ui.createSettingRow(s, 'simple');
+      simpleContainer.appendChild(row);
+    });
+
+    // Edge settings
+    var edgeContainer = document.getElementById('edgeSettingsList');
+    edgeContainer.innerHTML = '';
+    EDGE_SETTINGS.forEach(function(s) {
+      var row = ui.createSettingRow(s, 'edge');
+      edgeContainer.appendChild(row);
+    });
+  },
+
+  createSettingRow: function(s, category) {
+    var row = document.createElement('div');
+    row.className = 'setting-row';
+    row.id = 'setting-' + s.id;
+
+    var value = appState.values[s.id];
+    if (value === null || value === undefined) {
+      value = s.default;
+    }
+
+    // Check if proc node is known to be unavailable
+    if (s.node && appState.nodeStatus[s.node] === false) {
+      row.classList.add('disabled');
+    }
+
+    var infoHtml =
+      '<div class="setting-label">' + ui.escapeHtml(s.label) + '</div>' +
+      '<div class="setting-label-en">' + ui.escapeHtml(s.labelEn) + '</div>';
+    if (s.node && appState.nodeStatus[s.node] === false) {
+      infoHtml += '<div class="setting-error" style="display:block;color:var(--warn)">节点不可用 / Node unavailable</div>';
+    }
+
+    row.innerHTML =
+      '<div class="setting-info">' + infoHtml + '</div>' +
+      '<div class="setting-control" id="ctrl-' + s.id + '"></div>';
+
+    // Defer control creation to handle DOM properly
+    setTimeout(function() {
+      ui.createControl(s, value, row);
+    }, 0);
+
+    return row;
+  },
+
+  createControl: function(s, value, row) {
+    var ctrl = document.getElementById('ctrl-' + s.id);
+    if (!ctrl) return;
+
+    switch (s.type) {
+      case 'toggle':
+        var checked = (String(value) === String(s.toggleOn));
+        ctrl.innerHTML =
+          '<label class="toggle">' +
+            '<input type="checkbox" id="inp-' + s.id + '"' + (checked ? ' checked' : '') +
+            ' data-on="' + s.toggleOn + '" data-off="' + s.toggleOff + '"' +
+            ' onchange="app.onToggleChange(\'' + s.id + '\', this)">' +
+            '<span class="slider"></span>' +
+          '</label>';
+        break;
+
+      case 'select':
+        var optionsHtml = '';
+        s.options.forEach(function(opt) {
+          var label = s.optionLabels && s.optionLabels[opt] ? s.optionLabels[opt] : String(opt);
+          var sel = (String(value) === String(opt)) ? ' selected' : '';
+          optionsHtml += '<option value="' + opt + '"' + sel + '>' + ui.escapeHtml(label) + '</option>';
+        });
+        ctrl.innerHTML = '<select id="inp-' + s.id + '" onchange="app.onSelectChange(\'' + s.id + '\', this)">' + optionsHtml + '</select>';
+        break;
+
+      case 'number':
+        ctrl.innerHTML = '<input type="number" id="inp-' + s.id + '" value="' + ui.escapeAttr(String(value)) +
+          '" min="' + (s.min || 0) + '" max="' + (s.max || 999) +
+          '" onchange="app.onInputChange(\'' + s.id + '\', this)">';
+        break;
+
+      case 'text':
+        ctrl.innerHTML = '<input type="text" id="inp-' + s.id + '" value="' + ui.escapeAttr(String(value)) +
+          '" placeholder="' + (s.placeholder || '') +
+          '" onchange="app.onInputChange(\'' + s.id + '\', this)">';
+        break;
+
+      case 'readonly':
+        var display = (value !== null && value !== undefined) ? String(value) : 'N/A';
+        ctrl.innerHTML = '<span class="readonly-value">' + ui.escapeHtml(display) + '</span>';
+        break;
+    }
+  },
+
+  updateDisabledStates: function() {
+    SIMPLE_SETTINGS.forEach(function(s) {
+      var row = document.getElementById('setting-' + s.id);
+      if (row && s.node && appState.nodeStatus[s.node] === false) {
+        row.classList.add('disabled');
+      } else if (row) {
+        row.classList.remove('disabled');
+      }
+    });
+  },
+
+  escapeHtml: function(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  },
+
+  escapeAttr: function(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  },
+
+  refreshControls: function() {
+    var allSettings = SIMPLE_SETTINGS.concat(EDGE_SETTINGS);
+    allSettings.forEach(function(s) {
+      var ctrl = document.getElementById('ctrl-' + s.id);
+      var inp = document.getElementById('inp-' + s.id);
+      var value = appState.values[s.id];
+      if (inp) {
+        if (s.type === 'toggle') {
+          inp.checked = (String(value) === String(s.toggleOn));
+        } else if (s.type !== 'readonly') {
+          inp.value = value;
+        }
+      } else if (s.type === 'readonly' && ctrl) {
+        ctrl.innerHTML = '<span class="readonly-value">' + ui.escapeHtml(String(value || 'N/A')) + '</span>';
+      }
+    });
+    ui.updateDisabledStates();
+  }
+};
+
+// ============================================================
+// App Controller
+// ============================================================
+var app = {
+  onToggleChange: function(id, el) {
+    var onVal = el.getAttribute('data-on');
+    appState.values[id] = el.checked ? onVal : el.getAttribute('data-off');
+  },
+
+  onSelectChange: function(id, el) {
+    appState.values[id] = el.value;
+  },
+
+  onInputChange: function(id, el) {
+    appState.values[id] = el.value;
+  },
+
+  refreshAll: function() {
+    var fab = document.getElementById('fabRefresh');
+    var icon = fab.querySelector('svg');
+    fab.disabled = true;
+    if (icon) icon.style.display = 'none';
+    fab.classList.add('spinner-inset');
+    kernelsu.fullScreen(true);
+
+    dataOps.readAllProcValues().then(function() {
+      return dataOps.checkEdgeNode();
+    }).then(function() {
+      return dataOps.loadConfig();
+    }).then(function() {
+      ui.refreshControls();
+      ui.renderPresets();
+      fab.disabled = false;
+      fab.classList.remove('spinner-inset');
+      if (icon) icon.style.display = '';
+      toastSystem.success('已刷新 / Refreshed');
+    }).catch(function(e) {
+      fab.disabled = false;
+      fab.classList.remove('spinner-inset');
+      if (icon) icon.style.display = '';
+      toastSystem.error('刷新失败: ' + (e.message || '未知错误'));
+      ui.refreshControls();
+    });
+  },
+
+  applyAndSave: function() {
+    var btn = document.getElementById('fabSave');
+    btn.disabled = true;
+    loading.show('正在应用并保存... / Applying & saving...');
+
+    dataOps.applyToProc().then(function() {
+      return dataOps.saveConfig();
+    }).then(function() {
+      loading.hide();
+      btn.disabled = false;
+      toastSystem.success('已应用并保存 / Applied & Saved');
+      kernelsu.toast('TouchTweakZTE: 设置已保存');
+    }).catch(function(e) {
+      loading.hide();
+      btn.disabled = false;
+      toastSystem.error('保存失败: ' + (e.message || '未知错误'));
+      console.error('Save error:', e);
+    });
+  },
+
+  init: function() {
+    loading.show('正在初始化... / Initializing...');
+    kernelsu.fullScreen(true);
+
+    // 1. Try to load config first (determines initial values)
+    dataOps.loadConfig().then(function() {
+      // 2. Read current /proc values (overrides config for simple settings)
+      return dataOps.readAllProcValues();
+    }).then(function() {
+      return dataOps.checkEdgeNode();
+    }).then(function() {
+      // 3. Load presets
+      return dataOps.loadPresets();
+    }).then(function() {
+      // 4. Render UI
+      ui.renderSettings();
+      ui.renderPresets();
+      // Check if current values match any preset
+      presetManager.detectActivePreset();
+      appState.initialized = true;
+      loading.hide();
+    }).catch(function(e) {
+      console.error('Init error:', e);
+      // Still render with defaults even on error
+      ui.renderSettings();
+      ui.renderPresets();
+      appState.initialized = true;
+      loading.hide();
+      toastSystem.warn('部分初始化失败 / Partial init failed');
+      kernelsu.toast('TouchTweakZTE: 部分节点不可用');
+    });
+  }
+};
+
+// ============================================================
+// Preset Manager
+// ============================================================
+var presetManager = {
+  editingPresetId: null,
+
+  applyPreset: function(presetId) {
+    var preset = appState.presets.find(function(p) { return p.id === presetId; });
+    if (!preset) {
+      toastSystem.error('预设不存在 / Preset not found');
+      return;
+    }
+
+    loading.show('正在应用预设... / Applying preset...');
+
+    // Update values from preset
+    Object.keys(preset.values).forEach(function(key) {
+      if (appState.values.hasOwnProperty(key)) {
+        appState.values[key] = preset.values[key];
+      }
+    });
+
+    // Write to /proc and save to config
+    dataOps.applyToProc().then(function() {
+      return dataOps.saveConfig();
+    }).then(function() {
+      appState.activePresetId = presetId;
+      ui.refreshControls();
+      ui.renderPresets();
+      loading.hide();
+      toastSystem.success('已应用: ' + preset.name + ' / Applied: ' + (preset.nameEn || preset.name));
+      kernelsu.toast('TouchTweakZTE: ' + preset.name + ' applied');
+    }).catch(function(e) {
+      loading.hide();
+      toastSystem.error('应用预设失败: ' + (e.message || ''));
+    });
+  },
+
+  showEditor: function(presetId) {
+    this.editingPresetId = presetId || null;
+    var preset = null;
+
+    if (presetId) {
+      preset = appState.presets.find(function(p) { return p.id === presetId; });
+    }
+
+    var title = document.getElementById('presetModalTitle');
+    var nameInput = document.getElementById('presetNameInput');
+    var fieldsContainer = document.getElementById('presetModalFields');
+    var saveBtn = document.getElementById('presetModalSaveBtn');
+
+    if (preset) {
+      title.textContent = '编辑预设 / Edit Profile';
+      nameInput.value = preset.name || '';
+      // Also add nameEn if editing
+      if (preset.nameEn) {
+        nameInput.dataset.nameEn = preset.nameEn;
+      } else {
+        delete nameInput.dataset.nameEn;
+      }
+    } else {
+      title.textContent = '新建预设 / New Profile';
+      // Pre-fill with current values
+      nameInput.value = '';
+      delete nameInput.dataset.nameEn;
+    }
+
+    // Build fields for all settings
+    var values = preset ? preset.values : appState.values;
+    var html = '';
+    var allSettings = SIMPLE_SETTINGS.concat(EDGE_SETTINGS);
+
+    // Add nameEn field
+    html += '<div class="form-group"><label>英文名称 / English Name</label>' +
+      '<input type="text" id="modal_nameEn" value="' + ui.escapeAttr(preset ? (preset.nameEn || '') : '') + '" maxlength="30" placeholder="可选 / Optional"></div>';
+
+    allSettings.forEach(function(s) {
+      if (s.type === 'readonly') return; // Skip read-only in preset editor
+      var val = values[s.id] !== undefined ? values[s.id] : s.default;
+      html += '<div class="form-group"><label>' + ui.escapeHtml(s.label) + ' / ' + ui.escapeHtml(s.labelEn) + '</label>';
+
+      switch (s.type) {
+        case 'toggle':
+          var checked = (String(val) === String(s.toggleOn));
+          html += '<label class="toggle">' +
+            '<input type="checkbox" id="modal_' + s.id + '"' + (checked ? ' checked' : '') +
+            ' data-on="' + s.toggleOn + '" data-off="' + s.toggleOff + '">' +
+            '<span class="slider"></span></label>';
+          break;
+        case 'select':
+          html += '<select id="modal_' + s.id + '">';
+          s.options.forEach(function(opt) {
+            var label = s.optionLabels && s.optionLabels[opt] ? s.optionLabels[opt] : String(opt);
+            var sel = (String(val) === String(opt)) ? ' selected' : '';
+            html += '<option value="' + opt + '"' + sel + '>' + ui.escapeHtml(label) + '</option>';
+          });
+          html += '</select>';
+          break;
+        case 'number':
+          html += '<input type="number" id="modal_' + s.id + '" value="' + ui.escapeAttr(String(val)) +
+            '" min="' + (s.min || 0) + '" max="' + (s.max || 999) + '">';
+          break;
+        case 'text':
+          html += '<input type="text" id="modal_' + s.id + '" value="' + ui.escapeAttr(String(val)) +
+            '" placeholder="' + (s.placeholder || '') + '">';
+          break;
+      }
+      html += '</div>';
+    });
+
+    fieldsContainer.innerHTML = html;
+    document.getElementById('presetModal').classList.add('show');
+  },
+
+  closeEditor: function() {
+    document.getElementById('presetModal').classList.remove('show');
+    this.editingPresetId = null;
+  },
+
+  saveEditor: function() {
+    var nameInput = document.getElementById('presetNameInput');
+    var name = nameInput.value.trim();
+    if (!name) {
+      toastSystem.error('请输入预设名称 / Please enter a name');
+      return;
+    }
+
+    var nameEnEl = document.getElementById('modal_nameEn');
+    var nameEn = nameEnEl ? nameEnEl.value.trim() : '';
+
+    // Collect values from modal fields
+    var values = {};
+    var allSettings = SIMPLE_SETTINGS.concat(EDGE_SETTINGS);
+
+    allSettings.forEach(function(s) {
+      if (s.type === 'readonly') return;
+      var el = document.getElementById('modal_' + s.id);
+      if (!el) return;
+
+      switch (s.type) {
+        case 'toggle':
+          values[s.id] = el.checked ? el.getAttribute('data-on') : el.getAttribute('data-off');
+          break;
+        case 'select':
+        case 'number':
+        case 'text':
+          values[s.id] = el.value;
+          break;
+      }
+    });
+
+    // Generate ID for new presets
+    var presetId = this.editingPresetId || ('__user_' + Date.now());
+
+    var preset = {
+      id: presetId,
+      name: name,
+      nameEn: nameEn,
+      builtin: this.editingPresetId ?
+        (appState.presets.find(function(p) { return p.id === presetId; }) || {}).builtin || false
+        : false,
+      values: values
+    };
+
+    if (this.editingPresetId) {
+      // Update existing
+      var idx = appState.presets.findIndex(function(p) { return p.id === presetId; });
+      if (idx >= 0) {
+        appState.presets[idx] = preset;
+      } else {
+        appState.presets.push(preset);
+      }
+    } else {
+      appState.presets.push(preset);
+    }
+
+    // Save to file
+    dataOps.savePresets().then(function() {
+      ui.renderPresets();
+      presetManager.closeEditor();
+      toastSystem.success('预设已保存 / Profile saved');
+    }).catch(function(e) {
+      toastSystem.error('保存预设失败: ' + (e.message || ''));
+    });
+  },
+
+  deletePreset: function(presetId) {
+    var preset = appState.presets.find(function(p) { return p.id === presetId; });
+    if (!preset) return;
+    if (preset.builtin) {
+      toastSystem.warn('内置预设不可删除 / Built-in presets cannot be deleted');
+      return;
+    }
+
+    if (!confirm('确认删除预设 "' + preset.name + '"?\nDelete profile "' + (preset.nameEn || preset.name) + '"?\n此操作不可撤销 / This cannot be undone.')) {
+      return;
+    }
+
+    appState.presets = appState.presets.filter(function(p) { return p.id !== presetId; });
+    if (appState.activePresetId === presetId) {
+      appState.activePresetId = null;
+    }
+
+    dataOps.savePresets().then(function() {
+      ui.renderPresets();
+      toastSystem.success('预设已删除 / Profile deleted');
+    }).catch(function(e) {
+      toastSystem.error('删除失败: ' + (e.message || ''));
+    });
+  },
+
+  detectActivePreset: function() {
+    appState.activePresetId = null;
+    appState.presets.forEach(function(preset) {
+      var match = true;
+      var allKeys = Object.keys(preset.values);
+      for (var i = 0; i < allKeys.length; i++) {
+        var key = allKeys[i];
+        if (String(appState.values[key]) !== String(preset.values[key])) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        appState.activePresetId = preset.id;
+      }
+    });
+  }
+};
+
+// ============================================================
+// Initialize on page load
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  app.init();
+});
+</script>
+
+</body>
+</html>
