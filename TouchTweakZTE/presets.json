@@ -1,0 +1,44 @@
+{
+  "presets": [
+    {
+      "id": "__builtin_gaming",
+      "name": "游戏模式",
+      "nameEn": "Gaming",
+      "builtin": true,
+      "values": {
+        "play_game": 1,
+        "follow_hand_level": 0,
+        "stability_level": 0,
+        "sensibility": 4,
+        "edge_algo_open": 0,
+        "edge_jitter_pixel": 0,
+        "edge_jitter_timer": 0,
+        "edge_click_pixel": 0,
+        "edge_long_press_open": 0,
+        "edge_long_press_timer": 0,
+        "edge_long_press_pixel": "0,0,0,0",
+        "edge_overall": 0
+      }
+    },
+    {
+      "id": "__builtin_daily",
+      "name": "日常模式",
+      "nameEn": "Daily",
+      "builtin": true,
+      "values": {
+        "play_game": 1,
+        "follow_hand_level": 1,
+        "stability_level": 1,
+        "sensibility": 2,
+        "edge_algo_open": 1,
+        "edge_jitter_pixel": 10,
+        "edge_jitter_timer": 100,
+        "edge_click_pixel": 10,
+        "edge_long_press_open": 1,
+        "edge_long_press_timer": 500,
+        "edge_long_press_pixel": "10,10,20,20",
+        "edge_overall": 5
+      }
+    }
+  ]
+}
