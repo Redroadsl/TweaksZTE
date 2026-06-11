@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="color-scheme" content="dark">
 <title>TouchTweakZTE</title>
 <style>
 :root {
@@ -344,7 +346,8 @@ const kernelsu = (function() {
 // ============================================================
 // Constants
 // ============================================================
-var MODULE_DIR = '/data/adb/modules/TouchTweakZTE';
+var MODULE_ID = 'TouchTweakZTE';
+var MODULE_DIR = '/data/adb/modules/' + MODULE_ID;
 var PRESETS_FILE = MODULE_DIR + '/presets.json';
 var PROC_BASE = '/proc/touchscreen';
 var EDGE_NODE = PROC_BASE + '/edge_report_limit';
@@ -519,7 +522,7 @@ var dataOps = {
                 .concat(EDGE_SETTINGS)
                 .map(function(s) { return s.id; });
     var promises = keys.map(function(key) {
-      return kernelsu.exec('ksud module config get ' + key).then(function(r) {
+      return kernelsu.exec('KSU_MODULE=' + MODULE_ID + ' ksud module config get ' + key).then(function(r) {
         if (r.errno === 0 && r.stdout) {
           appState.values[key] = r.stdout;
         }
@@ -539,7 +542,7 @@ var dataOps = {
     settings.forEach(function(s) {
       var val = appState.values[s.id];
       chain = chain.then(function() {
-        return kernelsu.exec("ksud module config set " + s.id + " '" + escapeShellArg(String(val)) + "'").then(function(r) {
+        return kernelsu.exec('KSU_MODULE=' + MODULE_ID + ' ksud module config set ' + s.id + " '" + escapeShellArg(String(val)) + "'").then(function(r) {
           if (r.errno !== 0) throw new Error('Failed to set config ' + s.id + ': errno=' + r.errno);
         });
       });
@@ -871,7 +874,6 @@ var app = {
     fab.disabled = true;
     if (icon) icon.style.display = 'none';
     fab.classList.add('spinner-inset');
-    kernelsu.fullScreen(true);
 
     dataOps.readAllProcValues().then(function() {
       return dataOps.checkEdgeNode();
@@ -915,7 +917,6 @@ var app = {
 
   init: function() {
     loading.show('正在初始化... / Initializing...');
-    kernelsu.fullScreen(true);
 
     // 1. Try to load config first (determines initial values)
     dataOps.loadConfig().then(function() {
