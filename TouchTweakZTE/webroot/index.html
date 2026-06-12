@@ -34,7 +34,7 @@ body{
 .container{max-width:600px;margin:0 auto;padding:16px}
 
 /* Header */
-.header{padding:20px 0 8px;text-align:center}
+.header{padding:20px 0 24px;text-align:center}
 .header h1{font-size:1.4rem;font-weight:700;color:var(--text);letter-spacing:-0.3px}
 .header .subtitle{font-size:0.8rem;color:var(--text3);margin-top:2px}
 
@@ -932,6 +932,11 @@ var app = {
     dataOps.applyToProc().then(function() {
       return dataOps.saveConfig();
     }).then(function() {
+      // Clear active preset since user manually changed settings
+      appState.activePresetId = null;
+      ui.renderPresets();
+      return kernelsu.exec('KSU_MODULE=' + MODULE_ID + ' ksud module config delete active_preset').catch(function(){});
+    }).then(function() {
       loading.hide();
       btn.disabled = false;
       toastSystem.success('已应用并保存 / Applied & Saved');
@@ -957,11 +962,29 @@ var app = {
       // 3. Load presets
       return dataOps.loadPresets();
     }).then(function() {
-      // 4. Render UI
+      // 4. Restore active preset from KSU config (saved on last apply)
+      return kernelsu.exec('KSU_MODULE=' + MODULE_ID + ' ksud module config get active_preset').then(function(r) {
+        if (r.errno === 0 && r.stdout) {
+          var storedId = r.stdout;
+          var preset = appState.presets.find(function(p) { return p.id === storedId; });
+          if (preset) {
+            // Verify current values still match the preset (user may have changed them manually)
+            var match = true;
+            Object.keys(preset.values).forEach(function(key) {
+              if (String(appState.values[key]) !== String(preset.values[key])) match = false;
+            });
+            if (match) appState.activePresetId = storedId;
+          }
+        }
+      }).catch(function() {});
+    }).then(function() {
+      // 5. Fallback: detect active preset by value matching (for first-time users)
+      if (!appState.activePresetId) {
+        presetManager.detectActivePreset();
+      }
+      // 6. Render UI
       ui.renderSettings();
       ui.renderPresets();
-      // Check if current values match any preset
-      presetManager.detectActivePreset();
       appState.initialized = true;
       loading.hide();
     }).catch(function(e) {
@@ -1002,6 +1025,9 @@ var presetManager = {
     // Write to /proc and save to config
     dataOps.applyToProc().then(function() {
       return dataOps.saveConfig();
+    }).then(function() {
+      // Persist active preset ID to KSU config
+      return kernelsu.exec('KSU_MODULE=' + MODULE_ID + ' ksud module config set active_preset ' + presetId);
     }).then(function() {
       appState.activePresetId = presetId;
       ui.refreshControls();
