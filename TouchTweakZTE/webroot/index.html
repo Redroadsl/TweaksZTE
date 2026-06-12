@@ -64,6 +64,14 @@ body{
   transition:all .15s ease;z-index:1;
 }
 .preset-card .preset-edit-btn:active{background:var(--surface2);color:var(--text)}
+.preset-card .preset-del-btn{
+  position:absolute;bottom:6px;right:6px;
+  width:28px;height:28px;border-radius:50%;
+  background:transparent;border:none;color:var(--text3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;z-index:1;
+}
+.preset-card .preset-del-btn:active{background:rgba(248,81,73,.15);color:var(--error)}
 .preset-name{font-size:0.9rem;font-weight:600;margin-bottom:2px;padding-right:24px}
 .preset-name-en{font-size:0.7rem;color:var(--text2)}
 .preset-badge{
@@ -175,6 +183,7 @@ input[type=text]{width:120px;text-align:left}
   display:none;position:fixed;top:0;left:0;right:0;bottom:0;
   background:rgba(0,0,0,0.6);z-index:200;align-items:center;
   justify-content:center;padding:20px;
+  overscroll-behavior:contain;
 }
 .modal-overlay.show{display:flex}
 .modal{
@@ -229,6 +238,17 @@ input[type=text]{width:120px;text-align:left}
 }
 .loading-box .spinner{margin-bottom:8px}
 .loading-box p{font-size:0.85rem;color:var(--text2)}
+
+/* Footer */
+.footer{
+  text-align:center;padding:24px 16px 16px;
+  border-top:1px solid var(--border);margin-top:8px;
+}
+.footer a{
+  font-size:0.75rem;color:var(--text3);text-decoration:none;
+  transition:color .15s;
+}
+.footer a:active{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -236,7 +256,7 @@ input[type=text]{width:120px;text-align:left}
 <div class="container">
   <div class="header">
     <h1>TouchTweakZTE</h1>
-    <div class="subtitle">触控调优 / Touch Optimization</div>
+    <div class="subtitle">努比亚红魔触控调优</div>
   </div>
 
   <!-- Presets Section -->
@@ -258,6 +278,13 @@ input[type=text]{width:120px;text-align:left}
   <div class="section" id="edgeSettings">
     <div class="section-title">边缘抑制与抖动过滤 / Edge &amp; Jitter</div>
     <div id="edgeSettingsList"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a href="https://github.com/Redroadsl/TweaksZTE" target="_blank" rel="noopener">TweaksZTE / TouchTweakZTE</a>
+    <span class="footer-sep">·</span>
+    <a href="https://github.com/Redroadsl" target="_blank" rel="noopener">Redroadsl</a>
   </div>
 </div>
 
@@ -357,21 +384,21 @@ var EDGE_NODE = PROC_BASE + '/edge_report_limit';
 // ============================================================
 var SIMPLE_SETTINGS = [
   { id: 'play_game',       node: 'play_game',         label: '游戏模式',       labelEn: 'Game Mode',            type: 'toggle',  default: 1, toggleOn: 1, toggleOff: 0 },
-  { id: 'follow_hand_level', node: 'follow_hand_level', label: '跟手性延迟',     labelEn: 'Follow Hand Level',     type: 'select',  default: 0, options: [0,1,2,3],        optionLabels: {0:'0 - 最高/Highest', 1:'1 - 高/High', 2:'2 - 中/Medium', 3:'3 - 低/Low'} },
-  { id: 'stability_level', node: 'stability_level',    label: '稳定性等级',     labelEn: 'Stability Level',       type: 'select',  default: 0, options: [0,1,2,3,4],      optionLabels: {0:'0 - 最低/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最高/Highest'} },
-  { id: 'sensibility',     node: 'sensibility',        label: '灵敏度',         labelEn: 'Sensitivity',           type: 'select',  default: 4, options: [0,1,2,3,4],      optionLabels: {0:'0',1:'1',2:'2',3:'3',4:'4 - 最高/Highest'} },
-  { id: 'tp_report_rate',  node: 'tp_report_rate',     label: '硬件回报率',     labelEn: 'Report Rate (Hz)',      type: 'readonly', default: null },
+  { id: 'follow_hand_level', node: 'follow_hand_level', label: '跟手性',     labelEn: 'Follow Hand Level',     type: 'select',  default: 4, options: [0,1,2,3,4],        optionLabels: {0:'0 - 最平滑/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最跟手/Hightst'} },
+  { id: 'stability_level', node: 'stability_level',    label: '稳定性',     labelEn: 'Stability Level',       type: 'select',  default: 0, options: [0,1,2,3,4],      optionLabels: {0:'0 - 最灵活/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最稳定/Highest'} },
+  { id: 'sensibility',     node: 'sensibility',        label: '灵敏度',         labelEn: 'Sensitivity',           type: 'select',  default: 4, options: [0,1,2,3,4],      optionLabels: {0:'0 - 最木讷/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最灵敏/Hightst'} },
+  { id: 'tp_report_rate',  node: 'tp_report_rate',     label: '硬件回报率',     labelEn: 'Report Rate',      type: 'select', default: 1, options: [0,1,2,3,4],      optionLabels: {0:'0 - 最低/Lowest', 1:'1 - 低/Low', 2:'2 - 中/Medium', 3:'3 - 高/High', 4:'4 - 最高/Hightst'}},
 ];
 
 var EDGE_SETTINGS = [
-  { id: 'edge_algo_open',         key: 'algo_open',         label: '边缘抑制算法',   labelEn: 'Edge Algo',            type: 'toggle', default: 0, toggleOn: 1, toggleOff: 0 },
-  { id: 'edge_jitter_pixel',      key: 'jitter_pixel',      label: '抖动过滤像素',   labelEn: 'Jitter Pixel Thr.',    type: 'number', default: 0, min: 0, max: 100 },
-  { id: 'edge_jitter_timer',      key: 'jitter_timer',      label: '抖动过滤时间',   labelEn: 'Jitter Timer Thr.',    type: 'number', default: 0, min: 0, max: 100 },
-  { id: 'edge_click_pixel',       key: 'click_pixel',       label: '点击稳定像素',   labelEn: 'Click Pixel Thr.',     type: 'number', default: 0, min: 0, max: 100 },
+  { id: 'edge_algo_open',         key: 'algo_open',         label: '边缘抑制算法',   labelEn: 'Edge Algo',            type: 'toggle', default: 1, toggleOn: 1, toggleOff: 0 },
+  { id: 'edge_jitter_pixel',      key: 'jitter_pixel',      label: '抖动过滤像素',   labelEn: 'Jitter Pixel Thr.',    type: 'number', default: 10, min: 0, max: 100,   placeholder: '10' },
+  { id: 'edge_jitter_timer',      key: 'jitter_timer',      label: '抖动过滤时间',   labelEn: 'Jitter Timer Thr.',    type: 'number', default: 100, min: 0, max: 1000,  placeholder: '100' },
+  { id: 'edge_click_pixel',       key: 'click_pixel',       label: '点击稳定像素',   labelEn: 'Click Pixel Thr.',     type: 'number', default: 10, min: 0, max: 100,   placeholder: '10' },
   { id: 'edge_long_press_open',   key: 'long_press_open',   label: '长按判定开关',   labelEn: 'Long Press Enable',    type: 'toggle', default: 0, toggleOn: 1, toggleOff: 0 },
-  { id: 'edge_long_press_timer',  key: 'long_press_timer',  label: '长按判定延迟',   labelEn: 'Long Press Timer',     type: 'number', default: 0, min: 0, max: 200 },
-  { id: 'edge_long_press_pixel',  key: 'long_press_pixel',  label: '长按像素阈值',   labelEn: 'Long Press Pixel',     type: 'text',   default: '0,0,0,0', placeholder: '0,0,0,0' },
-  { id: 'edge_overall',           key: 'edge_overall',      label: '总体调整值',     labelEn: 'Overall Adjustment',   type: 'number', default: 0, min: 0, max: 100 },
+  { id: 'edge_long_press_timer',  key: 'long_press_timer',  label: '长按判定延迟',   labelEn: 'Long Press Timer',     type: 'number', default: 500, min: 0, max: 1000,  placeholder: '500' },
+  { id: 'edge_long_press_pixel',  key: 'long_press_pixel',  label: '长按像素阈值',   labelEn: 'Long Press Pixel',     type: 'text',   default: '10,10,20,20', placeholder: '10,10,20,20' },
+  { id: 'edge_overall',           key: 'edge_overall',      label: '边缘防误触总体调整',     labelEn: 'Overall Edge Adjustment',   type: 'number', default: 1, min: 0, max: 10,    placeholder: '1' },
 ];
 
 // Edge settings write order (must match boot-completed.sh sequence)
@@ -697,12 +724,13 @@ var ui = {
         '<button class="preset-edit-btn" onclick="event.stopPropagation();presetManager.showEditor(\'' + ui.escapeAttr(preset.id) + '\')" title="编辑 / Edit">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>' +
         '</button>' +
+        (preset.builtin ? '' :
+          '<button class="preset-del-btn" onclick="event.stopPropagation();presetManager.deletePreset(\'' + ui.escapeAttr(preset.id) + '\')" title="删除 / Delete">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+          '</button>') +
         '<div class="preset-name">' + ui.escapeHtml(preset.name) + '</div>' +
         '<div class="preset-name-en">' + ui.escapeHtml(preset.nameEn || '') + '</div>' +
-        '<span class="preset-badge ' + badgeClass + '">' + badgeText + '</span>' +
-        '<div class="preset-actions">' +
-          (preset.builtin ? '' : '<button class="danger" onclick="event.stopPropagation();presetManager.deletePreset(\'' + ui.escapeAttr(preset.id) + '\')">删除 Del</button>') +
-        '</div>';
+        '<span class="preset-badge ' + badgeClass + '">' + badgeText + '</span>';
 
       card.addEventListener('click', function() {
         presetManager.applyPreset(preset.id);
@@ -793,8 +821,9 @@ var ui = {
 
       case 'number':
         ctrl.innerHTML = '<input type="number" id="inp-' + s.id + '" value="' + ui.escapeAttr(String(value)) +
-          '" min="' + (s.min || 0) + '" max="' + (s.max || 999) +
-          '" onchange="app.onInputChange(\'' + s.id + '\', this)">';
+          '" min="' + (s.min || 0) + '" max="' + (s.max || 999) + '"' +
+          (s.placeholder ? ' placeholder="' + ui.escapeAttr(String(s.placeholder)) + '"' : '') +
+          ' onchange="app.onInputChange(\'' + s.id + '\', this)">';
         break;
 
       case 'text':
@@ -1021,7 +1050,7 @@ var presetManager = {
     var allSettings = SIMPLE_SETTINGS.concat(EDGE_SETTINGS);
 
     // Add nameEn field
-    html += '<div class="form-group"><label>英文名称 / English Name</label>' +
+    html += '<div class="form-group"><label>描述 / Description</label>' +
       '<input type="text" id="modal_nameEn" value="' + ui.escapeAttr(preset ? (preset.nameEn || '') : '') + '" maxlength="30" placeholder="可选 / Optional"></div>';
 
     allSettings.forEach(function(s) {
@@ -1060,10 +1089,12 @@ var presetManager = {
 
     fieldsContainer.innerHTML = html;
     document.getElementById('presetModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
   },
 
   closeEditor: function() {
     document.getElementById('presetModal').classList.remove('show');
+    document.body.style.overflow = '';
     this.editingPresetId = null;
   },
 
