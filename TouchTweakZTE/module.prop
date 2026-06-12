@@ -1,7 +1,7 @@
 id=TouchTweakZTE
 name=tZTE 跟手触控调优
-version=Swift
-versionCode=2
+version=Swift 3 WebUI
+versionCode=3
 author=Redroadsl@outlook.com
-description=【执行获取状态】避免增加耗电的条件下尽量调优触控。Github:TweaksZTE
+description=努比亚红魔触控调优，打开WebUI进行设置。\nGithub:Redroadsl/TweaksZTE
 updateJson=https://raw.githubusercontent.com/Redroadsl/TweaksZTE/refs/heads/main/TouchTweakZTE/update.json

@@ -1,6 +1,6 @@
 {
-    "version": "Swift",
-    "versionCode": 2,
-    "zipUrl": "https://github.com/Redroadsl/TweaksZTE/releases/download/1.1.1/TouchTweakZTE.zip",
-    "changelog": "https://github.com/Redroadsl/TweaksZTE/commits/1.1.1"
+    "version": "Swift 3 WebUI",
+    "versionCode": 3,
+    "zipUrl": "https://github.com/Redroadsl/TweaksZTE/releases/latest/download/TouchTweakZTE.zip",
+    "changelog": "https://raw.githubusercontent.com/Redroadsl/TweaksZTE/refs/heads/main/TouchTweakZTE/update_changes.md"
 }
